@@ -30,13 +30,6 @@ export function startVM(options: { name: string }) {
     )
 
     kubectlApplyManifest(
-        Manifests.UserDataSecretManifest({
-            namespace,
-            secretName: userDataSecretName,
-        })
-    )
-
-    kubectlApplyManifest(
         Manifests.VirtualMachineManifest({
             namespace,
             vmName: options.name,

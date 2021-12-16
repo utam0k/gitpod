@@ -74,10 +74,14 @@ spec:
             image: tedezed/ubuntu-container-disk:latest
         - name: cloudinitdisk
           cloudInitNoCloud:
-            networkDataSecretRef:
-              name: ${userDataSecretName}
-            secretRef:
-              name: ${userDataSecretName}
+            userData: |-
+              #cloud-config
+              chpasswd:
+                list: |
+                  ubuntu:ubuntu
+                expire: False
+              runcmd:
+                - curl -sfL https://get.k3s.io | sh -
 `
 }
 
@@ -120,24 +124,4 @@ spec:
 type UserDataSecretManifestOptions = {
   namespace: string,
   secretName: string
-}
-
-export function UserDataSecretManifest({ namespace, secretName }: UserDataSecretManifestOptions) {
-  const userdata = Buffer.from(`#cloud-config
-users:
-  - name: ubuntu
-    lock_passwd: false
-    sudo: "ALL=(ALL) NOPASSWD: ALL"
-    passwd: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"`).toString("base64")
-  return `
-apiVersion: v1
-type: secret
-kind: Secret
-data:
-  networkdata: ""
-  userdata: ${userdata}
-metadata:
-  name: ${secretName}
-  namespace: ${namespace}
-`
 }
