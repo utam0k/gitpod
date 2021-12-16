@@ -14,11 +14,10 @@ metadata:
 type VirtualMachineManifestArguments = {
   vmName: string
   namespace: string
-  claimName: string,
   userDataSecretName: string
 }
 
-export function VirtualMachineManifest({ vmName, namespace, claimName, userDataSecretName }: VirtualMachineManifestArguments) {
+export function VirtualMachineManifest({ vmName, namespace, userDataSecretName }: VirtualMachineManifestArguments) {
   return `
 apiVersion: kubevirt.io/v1
 type: kubevirt.io.virtualmachine
@@ -26,7 +25,6 @@ kind: VirtualMachine
 metadata:
   namespace: ${namespace}
   annotations:
-    harvesterhci.io/volumeClaimTemplates: '[{"metadata":{"name":"${claimName}","annotations":{"harvesterhci.io/imageId":"default/image-cjlm2"}},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"10Gi"}},"volumeMode":"Block","storageClassName":"longhorn-image-cjlm2"}}]'
     network.harvesterhci.io/ips: "[]"
   labels:
     harvesterhci.io/creator: harvester
@@ -72,8 +70,8 @@ spec:
           name: default
       volumes:
         - name: system
-          persistentVolumeClaim:
-            claimName: ${claimName}
+          containerDisk:
+            image: tedezed/ubuntu-container-disk:latest
         - name: cloudinitdisk
           cloudInitNoCloud:
             networkDataSecretRef:
