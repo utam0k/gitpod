@@ -314,7 +314,9 @@ export async function build(context, version) {
         werft.log(vmSlices.KUBECONFIG, 'Copying k3s kubeconfig')
         exec(`sleep 10`)
         exec(`ssh -i /workspace/.ssh/id_rsa_harvester_vm ubuntu@127.0.0.1 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no 'sudo cat /etc/rancher/k3s/k3s.yaml' > k3s.yml`)
-        exec(`kubectl --kubeconfig=k3s.yml get ns`)
+        // Override existing kubeconfig so all future kubectl commands use the k3s cluster.
+        exec(`mv k3s.yml /home/gitpod/.kube/config`)
+        exec(`kubectl get ns`)
 
         return
     }
