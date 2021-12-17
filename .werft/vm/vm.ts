@@ -79,5 +79,12 @@ export function waitForVM(options: { name: string, timeoutMS: number }) {
         console.log(`VM is not yet running. Current status is ${status}. Sleeping 5 seconds`)
         exec('sleep 5', { silent: true })
     }
+}
 
+/**
+ * Proxy 127.0.0.1:22 to :22 in the VM through the k8s service
+ */
+export function startSSHProxy(options: { name: string }) {
+    const namespace = `preview-${options.name}`
+    exec(`sudo kubectl --kubeconfig=${KUBECONFIG_PATH} -n ${namespace} port-forward service/proxy 22:22 > /dev/null &`)
 }
