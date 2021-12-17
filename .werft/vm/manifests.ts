@@ -15,10 +15,9 @@ type VirtualMachineManifestArguments = {
   vmName: string
   namespace: string
   claimName: string,
-  userDataSecretName: string
 }
 
-export function VirtualMachineManifest({ vmName, namespace, claimName, userDataSecretName }: VirtualMachineManifestArguments) {
+export function VirtualMachineManifest({ vmName, namespace, claimName }: VirtualMachineManifestArguments) {
   return `
 apiVersion: kubevirt.io/v1
 type: kubevirt.io.virtualmachine
