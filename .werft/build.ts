@@ -52,6 +52,9 @@ Tracing.initialize()
             // Explicitly not using process.exit as we need to flush tracing, see tracing.js
             process.exitCode = 1
         }
+
+        // TODO: Find a better place for this. This terminates background proxies.
+        exec(`killall kubectl || true`)
     })
 
 // Werft phases
