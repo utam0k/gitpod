@@ -301,7 +301,7 @@ export async function build(context, version) {
 
         werft.log(vmSlices.COPY_CERT_MANAGER_RESOURCES, 'Copy over CertManager resources from core-dev')
         exec(`kubectl get secret clouddns-dns01-solver-svc-acct -n certmanager -o yaml | sed 's/namespace: certmanager/namespace: cert-manager/g' > clouddns-dns01-solver-svc-acct.yaml`)
-        exec(`kubectl get clusterissuer letsencrypt-issuer-gitpod-core-dev -o yaml > letsencrypt-issuer-gitpod-core-dev.yaml`)
+        exec(`kubectl get clusterissuer letsencrypt-issuer-gitpod-core-dev -o yaml | sed 's/letsencrypt-issuer-gitpod-core-dev/letsencrypt-issuer/g' > letsencrypt-issuer.yaml`)
 
         const existingVM = VM.vmExists({ name: destname })
         if (!existingVM) {
@@ -335,7 +335,7 @@ export async function build(context, version) {
         exec(`mv k3s.yml /home/gitpod/.kube/config`)
 
         if (!existingVM) {
-            exec(`kubectl apply -f clouddns-dns01-solver-svc-acct.yaml -f letsencrypt-issuer-gitpod-core-dev.yaml`)
+            exec(`kubectl apply -f clouddns-dns01-solver-svc-acct.yaml -f letsencrypt-issuer.yaml`)
         }
     }
 
