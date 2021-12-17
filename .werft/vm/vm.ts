@@ -88,3 +88,11 @@ export function startSSHProxy(options: { name: string }) {
     const namespace = `preview-${options.name}`
     exec(`sudo kubectl --kubeconfig=${KUBECONFIG_PATH} -n ${namespace} port-forward service/proxy 22:22`, { async: true, silent: true })
 }
+
+/**
+ * Proxy 127.0.0.1:6443 to :6443 in the VM through the k8s service
+ */
+export function startKubeAPIProxy(options: { name: string }): Promise<ExecResult> {
+    const namespace = `preview-${options.name}`
+    return exec(`sudo kubectl --kubeconfig=${KUBECONFIG_PATH} -n ${namespace} port-forward service/proxy 6443:6443`, { async: true, silent: true })
+}

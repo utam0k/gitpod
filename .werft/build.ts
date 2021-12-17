@@ -308,12 +308,14 @@ export async function build(context, version) {
         werft.log(vmSlices.SSH_PROXY, 'Starting SSH proxy')
         VM.startSSHProxy({ name: destname })
 
+        werft.log(vmSlices.SSH_PROXY, 'Starting k8s API proxy')
+        VM.startKubeAPIProxy({ name: destname })
+
         werft.log(vmSlices.KUBECONFIG, 'Copying k3s kubeconfig')
         exec(`sleep 10`)
-        exec(`ssh -i /workspace/.ssh/id_rsa_harvester_vm ubuntu@127.0.0.1 -o StrictHostKeyChecking=no 'sudo cat /etc/rancher/k3s/k3s.yaml' > k3s.yml`)
-        exec(`cat k3s.yml`)
+        exec(`ssh -i /workspace/.ssh/id_rsa_harvester_vm ubuntu@127.0.0.1 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no 'sudo cat /etc/rancher/k3s/k3s.yaml' > k3s.yml`)
+        exec(`kubectl --kubeconfig=k3s.yml get ns`)
 
-        werft.done(phases.VM)
         return
     }
 
