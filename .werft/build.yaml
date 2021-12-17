@@ -39,6 +39,7 @@ pod:
   - name: harvester-vm-ssh-keys
     secret:
       secretName: harvester-vm-ssh-keys
+      defaultMode: 0600
   # - name: deploy-key
   #   secret:
   #     secretName: deploy-key
@@ -87,7 +88,6 @@ pod:
       mountPath: /mnt/secrets/harvester-kubeconfig
     - name: harvester-vm-ssh-keys
       mountPath: /mnt/secrets/harvester-vm-ssh-keys
-      readOnly: false
     # - name: deploy-key
     #   mountPath: /mnt/secrets/deploy-key
     #   readOnly: true
@@ -168,9 +168,6 @@ pod:
 
         export DOCKER_HOST=tcp://$NODENAME:2475
         sudo chown -R gitpod:gitpod /workspace
-
-        sudo chmod 600 /mnt/secrets/harvester-vm-ssh-keys/id_rsa
-        sudo chmod 644 /mnt/secrets/harvester-vm-ssh-keys/id_rsa.pub
 
         (cd .werft && yarn install && mv node_modules ..) | werft log slice prep
         printf '{{ toJson . }}' > context.json

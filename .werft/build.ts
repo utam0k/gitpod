@@ -306,7 +306,7 @@ export async function build(context, version) {
         VM.startSSHProxy({ name: destname })
 
         exec(`sleep 10`)
-        exec(`ssh ubuntu@127.0.0.1 'sudo cat /etc/rancher/k3s/k3s.yaml' > k3s.yml`)
+        exec(`ssh -i /mnt/secrets/harvester-vm-ssh-keys/id_rsa ubuntu@127.0.0.1 'sudo cat /etc/rancher/k3s/k3s.yaml' > k3s.yml`)
         exec(`cat k3s.yml`)
 
         werft.done(phases.VM)
