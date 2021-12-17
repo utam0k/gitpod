@@ -33,6 +33,7 @@ export function startVM(options: { name: string }) {
         Manifests.VirtualMachineManifest({
             namespace,
             vmName: options.name,
+            claimName: `${options.name}-${Date.now()}`,
             userDataSecretName
         }),
         { validate: false }
