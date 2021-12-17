@@ -299,7 +299,12 @@ export async function build(context, version) {
     if (withVM) {
         werft.phase(phases.VM, "Start VM");
 
-        if (!VM.vmExists({ name: destname })) {
+        werft.log(vmSlices.COPY_CERT_MANAGER_RESOURCES, 'Copy over CertManager resources from core-dev')
+        exec(`kubectl get secret clouddns-dns01-solver-svc-acct -n certmanager -o yaml | sed 's/namespace: certmanager/namespace: cert-manager/g' > clouddns-dns01-solver-svc-acct.yaml`)
+        exec(`kubectl get clusterissuer letsencrypt-issuer-gitpod-core-dev -o yaml > letsencrypt-issuer-gitpod-core-dev.yaml`)
+
+        const existingVM = VM.vmExists({ name: destname })
+        if (!existingVM) {
             werft.log(vmSlices.BOOT_VM, 'Starting VM')
             VM.startVM({ name: destname })
         } else {
@@ -319,10 +324,6 @@ export async function build(context, version) {
         werft.log(vmSlices.SSH_PROXY, 'Starting k8s API proxy')
         VM.startKubeAPIProxy({ name: destname })
 
-        werft.log(vmSlices.COPY_CERT_MANAGER_RESOURCES, 'Copy over CertManager resources from core-dev')
-        exec(`kubectl get secret clouddns-dns01-solver-svc-acct -n certmanager -o yaml | sed 's/namespace: certmanager/namespace: cert-manager/g' > clouddns-dns01-solver-svc-acct.yaml`)
-        exec(`kubectl get clusterissuer letsencrypt-issuer-gitpod-core-dev -o yaml > letsencrypt-issuer-gitpod-core-dev.yaml`)
-
         werft.log(vmSlices.KUBECONFIG, 'Copying k3s kubeconfig')
         // TODO: This is currently flaky and sometimes fails if the VM isn't ready in time.
         //       instead of just sleeping we should periodically check if SSH access is ready.
@@ -332,7 +333,10 @@ export async function build(context, version) {
         // TODO: This was a quick have to override the existing kubeconfig so all future kubectl commands use the k3s cluster.
         //       We might want to keep both kubeconfigs around and be explicit about which one we're using
         exec(`mv k3s.yml /home/gitpod/.kube/config`)
-        exec(`kubectl apply -f clouddns-dns01-solver-svc-acct.yaml -f letsencrypt-issuer-gitpod-core-dev.yaml`)
+
+        if (!existingVM) {
+            exec(`kubectl apply -f clouddns-dns01-solver-svc-acct.yaml -f letsencrypt-issuer-gitpod-core-dev.yaml`)
+        }
     }
 
     werft.phase(phases.PREDEPLOY, "Checking for existing installations...");
