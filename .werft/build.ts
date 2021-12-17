@@ -54,7 +54,7 @@ Tracing.initialize()
         }
 
         // TODO: Find a better place for this. This terminates background proxies.
-        exec(`killall kubectl || true`)
+        exec(`sudo killall kubectl || true`)
     })
 
 // Werft phases
