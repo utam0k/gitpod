@@ -90,6 +90,7 @@ spec:
               runcmd:
                 - curl -sfL https://get.k3s.io | sh -
                 - sleep 10
+                - kubectl label $(kubectl get nodes -o name) gitpod.io/workload_meta=true gitpod.io/workload_ide=true gitpod.io/workload_workspace_services=true gitpod.io/workload_workspace_regular=true gitpod.io/workload_workspace_headless=true
                 - kubectl create ns certs
                 - kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.yaml
 `
