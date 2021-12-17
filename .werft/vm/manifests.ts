@@ -87,6 +87,8 @@ spec:
                 expire: False
               runcmd:
                 - curl -sfL https://get.k3s.io | sh -
+                - sleep 10
+                - kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.yaml
 `
 }
 
