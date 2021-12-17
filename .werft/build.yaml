@@ -170,7 +170,7 @@ pod:
 
         mkdir /workspace/.ssh
         cp /mnt/secrets/harvester-vm-ssh-keys/id_rsa /workspace/.ssh/id_rsa_harvester_vm
-        cp /mnt/secrets/harvester-vm-ssh-keys/id_rsa /workspace/.ssh/id_rsa_harvester_vm.pub
+        cp /mnt/secrets/harvester-vm-ssh-keys/id_rsa.pub /workspace/.ssh/id_rsa_harvester_vm.pub
         sudo chmod 600 /workspace/.ssh/id_rsa_harvester_vm
         sudo chmod 644 /workspace/.ssh/id_rsa_harvester_vm.pub
 
