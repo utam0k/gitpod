@@ -86,5 +86,5 @@ export function waitForVM(options: { name: string, timeoutMS: number }) {
  */
 export function startSSHProxy(options: { name: string }) {
     const namespace = `preview-${options.name}`
-    exec(`sudo kubectl --kubeconfig=${KUBECONFIG_PATH} -n ${namespace} port-forward service/proxy 22:22 > /dev/null &`)
+    exec(`sudo kubectl --kubeconfig=${KUBECONFIG_PATH} -n ${namespace} port-forward service/proxy 22:22`, { async: true, silent: true })
 }
