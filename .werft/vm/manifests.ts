@@ -46,7 +46,7 @@ spec:
         machine:
           type: q35
         cpu:
-          cores: 1
+          cores: 4
           sockets: 1
           threads: 1
         devices:
@@ -64,8 +64,8 @@ spec:
                 bus: virtio
         resources:
           limits:
-            memory: 2Gi
-            cpu: 1
+            memory: 8Gi
+            cpu: 4
       evictionStrategy: LiveMigrate
       networks:
         - pod: {}
