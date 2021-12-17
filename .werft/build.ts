@@ -317,8 +317,6 @@ export async function build(context, version) {
         // Override existing kubeconfig so all future kubectl commands use the k3s cluster.
         exec(`mv k3s.yml /home/gitpod/.kube/config`)
         exec(`kubectl get ns`)
-
-        return
     }
 
     werft.phase(phases.PREDEPLOY, "Checking for existing installations...");
