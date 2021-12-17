@@ -87,6 +87,7 @@ pod:
       mountPath: /mnt/secrets/harvester-kubeconfig
     - name: harvester-vm-ssh-keys
       mountPath: /mnt/secrets/harvester-vm-ssh-keys
+      readOnly: false
     # - name: deploy-key
     #   mountPath: /mnt/secrets/deploy-key
     #   readOnly: true
