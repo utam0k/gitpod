@@ -305,6 +305,10 @@ export async function build(context, version) {
         werft.log(vmSlices.BOOT_VM, 'Waiting for VM to be ready')
         VM.waitForVM({ name: destname, timeoutMS: 1000 * 60 * 3 })
 
+        // TODO: We're hoping to have the proxy in the Harvester cluster be able to forward
+        //       both SSH and Kube API so we don't need these two. Currently this will cause
+        //       the Werft job to never exit as these two proxies will keep the job from
+        //       terminating.
         werft.log(vmSlices.SSH_PROXY, 'Starting SSH proxy')
         VM.startSSHProxy({ name: destname })
 
@@ -312,11 +316,14 @@ export async function build(context, version) {
         VM.startKubeAPIProxy({ name: destname })
 
         werft.log(vmSlices.KUBECONFIG, 'Copying k3s kubeconfig')
+        // TODO: This is currently flaky and sometimes fails if the VM isn't ready in time.
+        //       instead of just sleeping we should periodically check if SSH access is ready.
         exec(`sleep 10`)
         exec(`ssh -i /workspace/.ssh/id_rsa_harvester_vm ubuntu@127.0.0.1 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no 'sudo cat /etc/rancher/k3s/k3s.yaml' > k3s.yml`)
-        // Override existing kubeconfig so all future kubectl commands use the k3s cluster.
+
+        // TODO: This was a quick have to override the existing kubeconfig so all future kubectl commands use the k3s cluster.
+        //       We might want to keep both kubeconfigs around and be explicit about which one we're using
         exec(`mv k3s.yml /home/gitpod/.kube/config`)
-        exec(`kubectl get ns`)
     }
 
     werft.phase(phases.PREDEPLOY, "Checking for existing installations...");
