@@ -87,11 +87,11 @@ spec:
                   ubuntu:ubuntu
                 expire: False
               runcmd:
-                - curl -sfL https://get.k3s.io | sh -
-                - sleep 10
-                - kubectl label nodes ${vmName} gitpod.io/workload_meta=true gitpod.io/workload_ide=true gitpod.io/workload_workspace_services=true gitpod.io/workload_workspace_regular=true gitpod.io/workload_workspace_headless=true gitpod.io/workspace_0=true gitpod.io/workspace_1=true gitpod.io/workspace_2=true
-                - kubectl create ns certs
-                - kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.yaml
+                - ["install-k3s.sh"]
+                - ["sleep 10"]
+                - ["kubectl label nodes ${vmName} gitpod.io/workload_meta=true gitpod.io/workload_ide=true gitpod.io/workload_workspace_services=true gitpod.io/workload_workspace_regular=true gitpod.io/workload_workspace_headless=true gitpod.io/workspace_0=true gitpod.io/workspace_1=true gitpod.io/workspace_2=true"]
+                - ["kubectl create ns certs"]
+                - ["kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.yaml"]
 `
 }
 
