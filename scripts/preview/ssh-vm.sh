@@ -5,13 +5,6 @@
 
 set -euo pipefail
 
-# TODO
-# - Start proxy, save PID, terminate on exit
-# - Download and chmod ssh keys
-# - (Verify VM exists?)
-# - SSH and start interacitve session
-# - optional: Make it possible to pass in a command so that it's a one-off way to SSH (use in Werft job)
-
 HARVESTER_KUBECONFIG_PATH="$HOME/.kube/config-harvester"
 PORT_FORWARD_PID=""
 
@@ -27,7 +20,9 @@ function cleanup {
     echo "Executing cleanup"
     if [[ -n "$PORT_FORWARD_PID" ]]; then
         echo "Terminating port-forwarding with PID: $PORT_FORWARD_PID"
-        kill -9 "$PORT_FORWARD_PID" > /dev/null 2>&1
+        # TODO: Perform more direct cleanup
+        # sudo kill -9 "$PORT_FORWARD_PID" > /dev/null 2>&1
+        sudo killall kubectl > /dev/null
     fi
 }
 
@@ -54,22 +49,21 @@ function startKubectlPortForwardForSSH {
     sudo kubectl \
         --kubeconfig="$HARVESTER_KUBECONFIG_PATH" \
         -n "$namespace" \
-        port-forward service/proxy 22:22 &
+        port-forward service/proxy 22:22 > /dev/null &
     PORT_FORWARD_PID="$!"
+
+    set +e
+    while true; do
+        echo "Trying to validate SSH connection"
+        (ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ubuntu@127.0.0.1 exit 0) && break
+        echo "Failed. Sleeping 5 seconds"
+        sleep 5
+    done
+    set -e
 }
 
 trap "cleanup" EXIT
 
 prepareSSHKeys
 startKubectlPortForwardForSSH
-ssh ubuntu@127.0.0.1
-
-
-# # Workspace: Start SSH proxy
-# sudo kubectl \
-# 	--kubeconfig=harvester-kubeconfig.yml \
-# 	-n preview-mads-harvester-k3s \
-# 	port-forward service/proxy 22:22
-
-# # Workspace: In a new shell SSH to the VM
-# ssh ubuntu@127.0.0.1
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ubuntu@127.0.0.1
