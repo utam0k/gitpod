@@ -16,7 +16,6 @@ require (
 	github.com/gitpod-io/gitpod/ws-daemon/api v0.0.0-00010101000000-000000000000
 	github.com/gitpod-io/gitpod/ws-manager/api v0.0.0-00010101000000-000000000000
 	github.com/gitpod-io/gitpod/ws-proxy v0.0.0-00010101000000-000000000000
-	github.com/gitpod-io/gitpod/ws-scheduler v0.0.0-00010101000000-000000000000
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/google/go-cmp v0.5.6
 	github.com/jetstack/cert-manager v1.4.4
@@ -228,8 +227,6 @@ replace github.com/gitpod-io/gitpod/image-builder => ../components/image-builder
 replace github.com/gitpod-io/gitpod/image-builder/api => ../components/image-builder-api/go // leeway
 
 replace github.com/gitpod-io/gitpod/openvsx-proxy => ../components/openvsx-proxy // leeway
-
-replace github.com/gitpod-io/gitpod/ws-scheduler => ../components/ee/ws-scheduler // leeway
 
 replace github.com/gitpod-io/gitpod/ws-proxy => ../components/ws-proxy // leeway
 

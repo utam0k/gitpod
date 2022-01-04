@@ -356,6 +356,7 @@ have a containerd runtime.
 ## Affinity Labels
 
 Your Kubernetes nodes must have the following labels applied to them:
+
 - `gitpod.io/workload_meta`
 - `gitpod.io/workload_ide`
 - `gitpod.io/workload_workspace_services`
