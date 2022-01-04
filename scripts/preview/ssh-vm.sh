@@ -40,7 +40,7 @@ function prepareSSHKeys {
 }
 
 function startKubectlPortForwardForSSH {
-    local vmName pid
+    local vmName namespace
     vmName="$(git symbolic-ref HEAD 2>&1 | awk '{ sub(/^refs\/heads\//, ""); $0 = tolower($0); gsub(/[^-a-z0-9]/, "-"); print }')"
     namespace="preview-${vmName}"
 
@@ -48,7 +48,7 @@ function startKubectlPortForwardForSSH {
     sudo kubectl \
         --kubeconfig="$HARVESTER_KUBECONFIG_PATH" \
         -n "$namespace" \
-        get vmi ${vmName} > /dev/null
+        get vmi "${vmName}" > /dev/null
 
     echo "Starting SSH port-forwaring to VM: ${vmName}"
     sudo kubectl \
