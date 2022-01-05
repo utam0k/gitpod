@@ -35,10 +35,15 @@ var Helm = common.CompositeHelmFunc(
 					helm.KeyValue("mysql.serviceAccount.name", Component),
 					helm.ImagePullSecrets("mysql.image.pullSecrets", cfg),
 					helm.KeyValue("mysql.image.registry", common.ThirdPartyContainerRepo(cfg.Config.Repository, common.DockerRegistryURL)),
-					helm.ImagePullSecrets("mysql.metrics.image.pullSecrets", cfg),
-					helm.KeyValue("mysql.metrics.image.registry", common.ThirdPartyContainerRepo(cfg.Config.Repository, common.DockerRegistryURL)),
 					helm.ImagePullSecrets("mysql.volumePermissions.image.pullSecrets", cfg),
 					helm.KeyValue("mysql.volumePermissions.image.registry", common.ThirdPartyContainerRepo(cfg.Config.Repository, common.DockerRegistryURL)),
+					// improve start time
+					helm.KeyValue("mysql.primary.startupProbe.enabled", "false"),
+					helm.KeyValue("mysql.primary.readinessProbe.initialDelaySeconds", "20"),
+					helm.KeyValue("mysql.metrics.enabled", "false"),
+
+					// helm.ImagePullSecrets("mysql.metrics.image.pullSecrets", cfg),
+					// helm.KeyValue("mysql.metrics.image.registry", common.ThirdPartyContainerRepo(cfg.Config.Repository, common.DockerRegistryURL)),
 				},
 				// This is too complex to be sent as a string
 				FileValues: []string{
