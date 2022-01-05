@@ -73,7 +73,8 @@ const installerSlices = {
     INSTALLER_RENDER: "installer render",
     INSTALLER_POST_PROCESSING: "installer post processing",
     APPLY_INSTALL_MANIFESTS: "installer apply",
-    DEPLOYMENT_WAITING: "monitor server deployment"
+    DEPLOYMENT_WAITING: "monitor server deployment",
+    DNS_ADD_RECORD: "add dns record"
 }
 
 const vmSlices = {
@@ -396,6 +397,7 @@ export async function deployToDevWithInstaller(deploymentConfig: DeploymentConfi
 
     // Now we want to execute further kubectl operations only in the created namespace
     setKubectlContextNamespace(namespace, metaEnv({ slice: installerSlices.SET_CONTEXT }));
+    werft.done(installerSlices.SET_CONTEXT)
 
     // trigger certificate issuing
     try {
@@ -578,6 +580,39 @@ export async function deployToDevWithInstaller(deploymentConfig: DeploymentConfi
     } catch (err) {
         werft.fail(installerSlices.DEPLOYMENT_WAITING, err);
     }
+    let wsProxyLBIP = null
+    werft.log(installerSlices.DNS_ADD_RECORD, "Getting ws-proxy loadbalancer IP");
+    for (let i = 0; i < 60; i++) {
+        try {
+            let lb = exec(`kubectl -n ${deploymentConfig.namespace} get service ws-proxy -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'`, { silent: true })
+            if (lb.length > 4) {
+                wsProxyLBIP = lb
+                break
+            }
+            await sleep(1000)
+        } catch (err) {
+            await sleep(1000)
+        }
+    }
+    if (wsProxyLBIP == null) {
+        werft.fail(installerSlices.DNS_ADD_RECORD, new Error("Can't get ws-proxy loadbalancer IP"));
+    }
+    werft.log(installerSlices.DNS_ADD_RECORD, "Get ws-proxy loadbalancer IP: " + wsProxyLBIP);
+
+    var cmd = `set -x \
+    && cd /workspace/.werft/dns \
+    && rm -rf .terraform* \
+    && export GOOGLE_APPLICATION_CREDENTIALS="${GCLOUD_SERVICE_ACCOUNT_PATH}" \
+    && terraform init -backend-config='prefix=${deploymentConfig.namespace}' -migrate-state -upgrade \
+    && terraform apply -auto-approve \
+        -var 'dns_zone_domain=gitpod-dev.com' \
+        -var 'domain=${deploymentConfig.domain}' \
+        -var 'ingress_ip=${getCoreDevIngressIP()}' \
+        -var 'ws_proxy_ip=${wsProxyLBIP}'`;
+
+    werft.log(installerSlices.DNS_ADD_RECORD, "Terraform command for create dns record: " + cmd)
+    exec(cmd, { ...metaEnv(), slice: installerSlices.DNS_ADD_RECORD });
+    werft.done(installerSlices.DNS_ADD_RECORD);
 
     // TODO: Fix sweeper, it does not appear to be doing clean-up
     werft.log('sweeper', 'installing Sweeper');

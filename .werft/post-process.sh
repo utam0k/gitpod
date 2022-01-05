@@ -206,6 +206,8 @@ while [ "$i" -le "$DOCS" ]; do
       WS_HOST_SUFFIX_EXPR="s/\"workspaceHostSuffix\": \".$CURRENT_WS_HOST_NAME\"/\"workspaceHostSuffix\": \".$NEW_WS_HOST_NAME\"/"
       sed -i "$WS_HOST_SUFFIX_EXPR" /tmp/"$NAME"overrides.yaml
 
+      sed -i "s/x-wsproxy-host/Host/" /tmp/"$NAME"overrides.yaml
+
       CURRENT_WS_SUFFIX_REGEX=$DEV_BRANCH.$STAGING_HOST_NAME
       # In this, we only do a find replace on a given line if we find workspaceHostSuffixRegex on the line
       sed -i -e "/workspaceHostSuffixRegex/s/$CURRENT_WS_SUFFIX_REGEX/$DEV_BRANCH\\\\\\\\.staging\\\\\\\\.gitpod-dev\\\\\\\\.com/g" /tmp/"$NAME"overrides.yaml
@@ -216,7 +218,10 @@ while [ "$i" -le "$DOCS" ]; do
     if [[ "ws-proxy" == "$NAME" ]] && [[ "$KIND" == "Service" ]]; then
       WORK="overrides for $NAME $KIND"
       echo "$WORK"
-      yq w -i k8s.yaml -d "$i" "metadata.annotations[cloud.google.com/neg]" '{"exposed_ports": {"22":{}}}'
+      # notice that current we use array index
+      yq w -i k8s.yaml -d "$i" "spec.ports.[0].port" 80
+      yq w -i k8s.yaml -d "$i" "spec.ports.[1].port" 443
+      yq w -i k8s.yaml -d "$i" "metadata.annotations[cloud.google.com/neg]" '{"exposed_ports": {"22":{},"80":{},"443":{}}}'
       yq w -i k8s.yaml -d "$i" spec.type LoadBalancer
    fi
 
