@@ -366,6 +366,22 @@ func (m *Manager) createDefiniteWorkspacePod(startContext *startWorkspaceContext
 					},
 				},
 			},
+			PodAffinity: &corev1.PodAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+					{
+						LabelSelector: &metav1.LabelSelector{
+							MatchExpressions: []metav1.LabelSelectorRequirement{
+								{
+									Key:      "component",
+									Operator: metav1.LabelSelectorOpIn,
+									Values:   []string{"ws-daemon", "registry-facade"},
+								},
+							},
+						},
+						TopologyKey: "kubernetes.io/hostname",
+					},
+				},
+			},
 		}
 	}
 
