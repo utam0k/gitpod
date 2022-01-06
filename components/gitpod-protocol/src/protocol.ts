@@ -1254,4 +1254,15 @@ export interface Terms {
 
 export interface WorkspaceClusterPreference {
     region?: string;
+    // lrm == lastRegionMeasurement. Not writing the full name to save
+    // a few 100mb in the database.
+    lrm?: string;
+}
+
+export interface WorkspaceClusterRTTEndpoints {
+    lastMeasurement?: string;
+    candidates: {
+        region: string;
+        endpoint: string;
+    }[];
 }

@@ -22,6 +22,7 @@ import fresh from "./images/welcome/fresh.svg";
 import prebuild from "./images/welcome/prebuild.svg";
 import exclamation from "./images/exclamation.svg";
 import { getURLHash } from "./App";
+import { measureAndPickWorkspaceClusterRegion } from "./start/choose-region";
 
 
 function Item(props: { icon: string, iconSize?: string, text: string }) {
@@ -83,6 +84,8 @@ export function Login() {
 
     const authorizeSuccessful = async (payload?: string) => {
         updateUser().catch(console.error);
+
+        await measureAndPickWorkspaceClusterRegion();
 
         // Check for a valid returnTo in payload
         const safeReturnTo = getSafeURLRedirect(payload);

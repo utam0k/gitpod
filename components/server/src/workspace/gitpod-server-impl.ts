@@ -6,7 +6,7 @@
 
 import { DownloadUrlRequest, DownloadUrlResponse, UploadUrlRequest, UploadUrlResponse } from '@gitpod/content-service/lib/blobs_pb';
 import { AppInstallationDB, UserDB, UserMessageViewsDB, WorkspaceDB, DBWithTracing, TracedWorkspaceDB, DBGitpodToken, DBUser, UserStorageResourcesDB, TeamDB } from '@gitpod/gitpod-db/lib';
-import { AuthProviderEntry, AuthProviderInfo, Branding, CommitContext, Configuration, CreateWorkspaceMode, DisposableCollection, GetWorkspaceTimeoutResult, GitpodClient as GitpodApiClient, GitpodServer, GitpodToken, GitpodTokenType, InstallPluginsParams, PermissionName, PortVisibility, PrebuiltWorkspace, PrebuiltWorkspaceContext, PreparePluginUploadParams, ResolvedPlugins, ResolvePluginsParams, SetWorkspaceTimeoutResult, StartPrebuildContext, StartWorkspaceResult, Terms, Token, UninstallPluginParams, User, UserEnvVar, UserEnvVarValue, UserInfo, WhitelistedRepository, Workspace, WorkspaceContext, WorkspaceCreationResult, WorkspaceImageBuild, WorkspaceInfo, WorkspaceInstance, WorkspaceInstancePort, WorkspaceInstanceUser, WorkspaceTimeoutDuration, GuessGitTokenScopesParams, GuessedGitTokenScopes, Team, TeamMemberInfo, TeamMembershipInvite, CreateProjectParams, Project, ProviderRepository, TeamMemberRole, WithDefaultConfig, FindPrebuildsParams, PrebuildWithStatus, StartPrebuildResult, ClientHeaderFields, WorkspaceClusterPreference } from '@gitpod/gitpod-protocol';
+import { AuthProviderEntry, AuthProviderInfo, Branding, CommitContext, Configuration, CreateWorkspaceMode, DisposableCollection, GetWorkspaceTimeoutResult, GitpodClient as GitpodApiClient, GitpodServer, GitpodToken, GitpodTokenType, InstallPluginsParams, PermissionName, PortVisibility, PrebuiltWorkspace, PrebuiltWorkspaceContext, PreparePluginUploadParams, ResolvedPlugins, ResolvePluginsParams, SetWorkspaceTimeoutResult, StartPrebuildContext, StartWorkspaceResult, Terms, Token, UninstallPluginParams, User, UserEnvVar, UserEnvVarValue, UserInfo, WhitelistedRepository, Workspace, WorkspaceContext, WorkspaceCreationResult, WorkspaceImageBuild, WorkspaceInfo, WorkspaceInstance, WorkspaceInstancePort, WorkspaceInstanceUser, WorkspaceTimeoutDuration, GuessGitTokenScopesParams, GuessedGitTokenScopes, Team, TeamMemberInfo, TeamMembershipInvite, CreateProjectParams, Project, ProviderRepository, TeamMemberRole, WithDefaultConfig, FindPrebuildsParams, PrebuildWithStatus, StartPrebuildResult, ClientHeaderFields, WorkspaceClusterPreference, WorkspaceClusterRTTEndpoints } from '@gitpod/gitpod-protocol';
 import { AccountStatement } from "@gitpod/gitpod-protocol/lib/accounting-protocol";
 import { AdminBlockUserRequest, AdminGetListRequest, AdminGetListResult, AdminGetWorkspacesRequest, AdminModifyPermanentWorkspaceFeatureFlagRequest, AdminModifyRoleOrPermissionRequest, WorkspaceAndInstance } from '@gitpod/gitpod-protocol/lib/admin-protocol';
 import { GetLicenseInfoResult, LicenseFeature, LicenseValidationResult } from '@gitpod/gitpod-protocol/lib/license-protocol';
@@ -2185,7 +2185,9 @@ export class GitpodServerImpl implements GitpodServerWithTracing, Disposable {
         return ideConfig.ideOptions;
     }
 
-    async listWorkspaceClusterRTTEndpoints(ctx: TraceContext): Promise<{ region: string; endpoint: string; }[]> {
+    async listWorkspaceClusterRTTEndpoints(ctx: TraceContext): Promise<WorkspaceClusterRTTEndpoints> {
+        const user = this.checkUser("listWorkspaceClusterRTTEndpoints");
+
         const candidates = await this.workspaceClusterDB.findFiltered({state: 'available'});
         const allEndpoints = candidates.flatMap(c => (c.admissionPreferences || []).filter(ap => ap.type === 'region')).map(ap => {
             const rap = ap as AdmissionPreferenceRegion;
@@ -2195,7 +2197,10 @@ export class GitpodServerImpl implements GitpodServerWithTracing, Disposable {
             };
         });
 
-        return [...new Set(allEndpoints)];
+        return {
+            lastMeasurement: user.additionalData?.clusterPreferences?.lrm,
+            candidates: [...new Set(allEndpoints)]
+        };
     }
 
     async setWorkspaceClusterPreferences(ctx: TraceContext, pref: WorkspaceClusterPreference): Promise<void> {
@@ -2206,6 +2211,7 @@ export class GitpodServerImpl implements GitpodServerWithTracing, Disposable {
 
         // don't just dump `pref` in here, we have no idea what it contains.
         clusterPref.region = pref.region;
+        clusterPref.lrm = new Date().toISOString();
 
         data.clusterPreferences = clusterPref;
         user.additionalData = data;
