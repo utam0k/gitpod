@@ -235,30 +235,15 @@
                                     {
                                         "key": "gitpod.io/workload_workspace_headless",
                                         "operator": "Exists"
+                                    },
+                                    {
+                                        "key": "gitpod.io/ready_for_workspaces_ns_default",
+                                        "operator": "Exists"
                                     }
                                 ]
                             }
                         ]
                     }
-                },
-                "podAffinity": {
-                    "requiredDuringSchedulingIgnoredDuringExecution": [
-                        {
-                            "labelSelector": {
-                                "matchExpressions": [
-                                    {
-                                        "key": "component",
-                                        "operator": "In",
-                                        "values": [
-                                            "ws-daemon",
-                                            "registry-facade"
-                                        ]
-                                    }
-                                ]
-                            },
-                            "topologyKey": "kubernetes.io/hostname"
-                        }
-                    ]
                 }
             },
             "schedulerName": "workspace-scheduler",

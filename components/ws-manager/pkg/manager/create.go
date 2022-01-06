@@ -361,24 +361,12 @@ func (m *Manager) createDefiniteWorkspacePod(startContext *startWorkspaceContext
 									Key:      "gitpod.io/workload_workspace_" + workloadType,
 									Operator: corev1.NodeSelectorOpExists,
 								},
-							},
-						},
-					},
-				},
-			},
-			PodAffinity: &corev1.PodAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-					{
-						LabelSelector: &metav1.LabelSelector{
-							MatchExpressions: []metav1.LabelSelectorRequirement{
 								{
-									Key:      "component",
-									Operator: metav1.LabelSelectorOpIn,
-									Values:   []string{"ws-daemon", "registry-facade"},
+									Key:      "gitpod.io/ready_for_workspaces_ns_" + m.Config.Namespace,
+									Operator: corev1.NodeSelectorOpExists,
 								},
 							},
 						},
-						TopologyKey: "kubernetes.io/hostname",
 					},
 				},
 			},

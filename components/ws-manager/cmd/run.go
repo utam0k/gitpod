@@ -178,6 +178,15 @@ var runCmd = &cobra.Command{
 			log.WithError(err).Fatal(err, "unable to create controller", "controller", "Pod")
 		}
 
+		err = manager.NewNodeLabelReconciler(
+			mgr.GetClient(),
+			ctrl.Log.WithName("controllers").WithName("Pod"),
+			mgr.GetScheme(),
+		).SetupWithManager(cfg.Manager.Namespace, mgr)
+		if err != nil {
+			log.WithError(err).Fatal(err, "unable to create controller", "controller", "Pod")
+		}
+
 		if cfg.PProf.Addr != "" {
 			go pprof.Serve(cfg.PProf.Addr)
 		}

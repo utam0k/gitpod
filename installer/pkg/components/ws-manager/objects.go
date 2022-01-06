@@ -12,6 +12,7 @@ var Objects = common.CompositeRenderFunc(
 	configmap,
 	deployment,
 	networkpolicy,
+	clusterRole,
 	role,
 	rolebinding,
 	common.DefaultServiceAccount(Component),
