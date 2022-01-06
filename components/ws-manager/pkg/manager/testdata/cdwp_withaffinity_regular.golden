@@ -218,6 +218,25 @@
                             }
                         ]
                     }
+                },
+                "podAffinity": {
+                    "requiredDuringSchedulingIgnoredDuringExecution": [
+                        {
+                            "labelSelector": {
+                                "matchExpressions": [
+                                    {
+                                        "key": "component",
+                                        "operator": "In",
+                                        "values": [
+                                            "ws-daemon",
+                                            "registry-facade"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "topologyKey": "kubernetes.io/hostname"
+                        }
+                    ]
                 }
             },
             "schedulerName": "workspace-scheduler",
