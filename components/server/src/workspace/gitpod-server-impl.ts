@@ -56,7 +56,7 @@ import { IDEConfigService } from '../ide-config';
 import { PartialProject } from '@gitpod/gitpod-protocol/src/teams-projects-protocol';
 import { ClientMetadata } from '../websocket/websocket-connection-manager';
 import { ConfigurationService } from '../config/configuration-service';
-import { AdmissionPreferenceRegion, WorkspaceClusterDB } from '@gitpod/gitpod-protocol/lib/workspace-cluster';
+import { AdmissionPreferenceRegion } from '@gitpod/gitpod-protocol/lib/workspace-cluster';
 
 // shortcut
 export const traceWI = (ctx: TraceContext, wi: Omit<LogContext, "userId">) => TraceContext.setOWI(ctx, wi);    // userId is already taken care of in WebsocketConnectionManager
@@ -113,8 +113,6 @@ export class GitpodServerImpl implements GitpodServerWithTracing, Disposable {
     @inject(ConfigurationService) protected readonly configurationService: ConfigurationService;
 
     @inject(IDEConfigService) protected readonly ideConfigService: IDEConfigService;
-
-    @inject(WorkspaceClusterDB) protected readonly workspaceClusterDB: WorkspaceClusterDB;
 
     /** Id the uniquely identifies this server instance */
     public readonly uuid: string = uuidv4();
@@ -2188,7 +2186,7 @@ export class GitpodServerImpl implements GitpodServerWithTracing, Disposable {
     async listWorkspaceClusterRTTEndpoints(ctx: TraceContext): Promise<WorkspaceClusterRTTEndpoints> {
         const user = this.checkUser("listWorkspaceClusterRTTEndpoints");
 
-        const candidates = await this.workspaceClusterDB.findFiltered({state: 'available'});
+        const candidates = await this.workspaceManagerClientProvider.getAvailableStartCluster(user);
         const allEndpoints = candidates.flatMap(c => (c.admissionPreferences || []).filter(ap => ap.type === 'region')).map(ap => {
             const rap = ap as AdmissionPreferenceRegion;
             return {
