@@ -5,16 +5,22 @@
 -->
 
 <idea-plugin>
-    <id>io.gitpod.jetbrains.remote</id>
-    <name>Gitpod Remote</name>
+    <id>io.gitpod.jetbrains.gateway</id>
+    <name>Gitpod Gateway</name>
     <vendor>Gitpod</vendor>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
+    <extensions defaultExtensionNs="com.intellij">
+        <httpRequestHandler implementation="io.gitpod.jetbrains.auth.GitpodAuthCallbackHandler"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.jetbrains">
+        <gatewayConnectionProvider implementation="io.gitpod.jetbrains.gateway.GitpodConnectionProvider"/>
+    </extensions>
+
     <applicationListeners>
-        <listener class="io.gitpod.jetbrains.remote.listeners.MyApplicationActivationListener"
-                  topic="com.intellij.openapi.application.ApplicationActivationListener"/>
     </applicationListeners>
 </idea-plugin>
