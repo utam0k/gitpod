@@ -6,7 +6,6 @@
 
 import { useEffect } from 'react';
 import gitpodIcon from '../icons/gitpod.svg';
-import { measureAndPickWorkspaceClusterRegion } from './choose-region';
 
 export enum StartPhase {
   Checking = 0,
@@ -85,7 +84,6 @@ export function StartPage(props: StartPageProps) {
   const { phase, error } = props;
   let title = props.title || getPhaseTitle(phase, error);
   useEffect(() => { document.title = 'Starting — Gitpod' }, []);
-  measureAndPickWorkspaceClusterRegion();
   return <div className="w-screen h-screen align-middle">
     <div className="flex flex-col mx-auto items-center text-center h-screen">
       <div className="h-1/3"></div>

@@ -14,15 +14,20 @@ import { getGitpodService } from "../service/service";
  * @returns void
  */
 async function measureAndPickWorkspaceClusterRegion(): Promise<void> {
-    const eps = await getGitpodService().server.listWorkspaceClusterRTTEndpoints();
+    const localStorageKey = "lastRTTMeasurement";
 
-    if (!!eps.lastMeasurement) {
-        const lrm = Date.parse(eps.lastMeasurement);
-        if (Date.now() - lrm < 6*60*60*1000) {
-            // we checked within the last six hours. Nothing to do here.
+    try {
+        let lastCheck = localStorage.getItem(localStorageKey);
+        if (!lastCheck || (Date.now() - Date.parse(lastCheck)) < 6*60*60*1000) {
+            // we've recently done the check.
             return;
         }
+    } catch (err) {
+        // Date.parse can fail ... in which case we assume we haven't done the RTT measurement recently.
+        console.log("cannot determine last RTT measurement run", err);
     }
+
+    const eps = await getGitpodService().server.listWorkspaceClusterRTTEndpoints();
 
     const region = await Promise.race(eps.candidates.map(ep => measureRTT(ep.endpoint, ep.region)));
     if (!region) {
@@ -30,33 +35,25 @@ async function measureAndPickWorkspaceClusterRegion(): Promise<void> {
         return;
     }
 
+    localStorage.setItem(localStorageKey, new Date().toISOString())
     await getGitpodService().server.setWorkspaceClusterPreferences({ region });
 }
 
 async function measureRTT(endpoint: string, region: string): Promise<string | undefined> {
-    const laps = 5;
-    let count = 0;
-    for (let i = 0; i < laps; i++) {
-        const controller = new AbortController();
-        const abort = setTimeout(() => controller.abort(), 1000);
+    const controller = new AbortController();
+    const abort = setTimeout(() => controller.abort(), 1000);
 
-        try {
-            await fetch(endpoint, {
-                cache: "no-cache",
-                signal: controller.signal,
-            });
-            count++;
-        } catch (err) {
-            console.debug(`failed to fetch RTT endpoint ${endpoint}: ${err}`);
-        } finally {
-            clearTimeout(abort);
-        }
-    }
-
-    if (count < 5) {
-        // we haven't completed all RTT measurements, hence take a penalty lap.
-        await new Promise(resolve => setTimeout(resolve, laps * 1000));
-        return;
+    try {
+        await Promise.all(Array(5).map(async () => {
+            try {
+                await fetch(endpoint, { cache: "no-cache", signal: controller.signal, });
+            } catch (err) {
+                // we don't want a single error to abort the race. For example, it's ok
+                // if the RTT endpoints return 404.
+            }
+        }))
+    } finally {
+        clearTimeout(abort);
     }
 
     return region;

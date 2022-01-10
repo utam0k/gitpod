@@ -2196,7 +2196,6 @@ export class GitpodServerImpl implements GitpodServerWithTracing, Disposable {
         });
 
         return {
-            lastMeasurement: user.additionalData?.clusterPreferences?.lrm,
             candidates: [...new Set(allEndpoints)]
         };
     }
@@ -2209,7 +2208,6 @@ export class GitpodServerImpl implements GitpodServerWithTracing, Disposable {
 
         // don't just dump `pref` in here, we have no idea what it contains.
         clusterPref.region = pref.region;
-        clusterPref.lrm = new Date().toISOString();
 
         data.clusterPreferences = clusterPref;
         user.additionalData = data;
