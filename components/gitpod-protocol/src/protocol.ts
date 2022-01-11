@@ -591,6 +591,7 @@ export interface GithubAppPrebuildConfig {
     branches?: boolean
     pullRequests?: boolean
     pullRequestsFromForks?: boolean
+    addCheck?: boolean
     addBadge?: boolean
     addLabel?: boolean | string
     addComment?: boolean
@@ -660,6 +661,17 @@ export namespace PrebuiltWorkspace {
     export function buildDidSucceed(pws: PrebuiltWorkspace) {
         return pws.state === "available" && !pws.error;
     }
+}
+
+export interface PrebuiltWorkspaceUpdatable {
+    id: string;
+    prebuiltWorkspaceId: string;
+    owner: string;
+    repo: string;
+    isResolved: boolean;
+    installationId: string;
+    issue?: string;
+    contextUrl?: string;
 }
 
 export interface WhitelistedRepository {
