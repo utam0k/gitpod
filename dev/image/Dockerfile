@@ -30,7 +30,7 @@ RUN mkdir -p /usr/local/kubernetes/ && \
 
 ENV PATH=$PATH:/usr/local/kubernetes/cluster/:/usr/local/kubernetes/client/bin/
 
-RUN sudo update-ca-certificates
+RUN sudo apt-get update
 
 ### kubectl ###
 RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
