@@ -30,7 +30,8 @@ RUN mkdir -p /usr/local/kubernetes/ && \
 
 ENV PATH=$PATH:/usr/local/kubernetes/cluster/:/usr/local/kubernetes/client/bin/
 
-RUN sudo apt update 2>&1 1>/dev/null | sed -ne 's/.*NO_PUBKEY //p' | while read key; do if ! [[ ${keys[*]} =~ "$key" ]]; then sudo apt-key adv --keyserver hkp://pool.sks-keyservers.net:80 --recv-keys "$key"; keys+=("$key"); fi; done
+RUN sudo apt-key adv --keyserver hkp://pool.sks-keyservers.net:80 15CF4D18AF4F7421 && \
+    sudo apt-key adv --keyserver hkp://pool.sks-keyservers.net:80 7EA0A9C3F273FCD8
 
 ### kubectl ###
 RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
