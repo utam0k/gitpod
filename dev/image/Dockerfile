@@ -30,8 +30,8 @@ RUN mkdir -p /usr/local/kubernetes/ && \
 
 ENV PATH=$PATH:/usr/local/kubernetes/cluster/:/usr/local/kubernetes/client/bin/
 
-RUN sudo apt-key adv --keyserver hkp://pool.sks-keyservers.net:80 15CF4D18AF4F7421 && \
-    sudo apt-key adv --keyserver hkp://pool.sks-keyservers.net:80 7EA0A9C3F273FCD8
+RUN sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 15CF4D18AF4F7421 && \
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7EA0A9C3F273FCD8
 
 ### kubectl ###
 RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
