@@ -20,7 +20,7 @@ var sendCmd = &cobra.Command{
 	Short: "Sends telemetry data",
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		// @todo(sje): replace with a database call to get status
-		canSendData := false
+		canSendData := true
 		if !canSendData {
 			log.Info("installation-telemetry is not permitted to send - exiting")
 			return nil
