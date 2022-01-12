@@ -269,6 +269,11 @@ func Run(options ...RunOption) {
 	}
 	apiServices = append(apiServices, additionalServices...)
 
+	apiReadyCtx, ideReadyCallback := context.WithCancel(context.Background())
+	var wg sync.WaitGroup
+	go startAPIEndpoint(ctx, cfg, &wg, ideReadyCallback, apiServices, tunneledPortsService, apiEndpointOpts...)
+	wg.Add(1)
+
 	// The reaper can be turned into a terminating reaper by writing true to this channel.
 	// When in terminating mode, the reaper will send SIGTERM to each child that gets reparented
 	// to us and is still running. We use this mechanism to send SIGTERM to a shell child processes
@@ -283,6 +288,8 @@ func Run(options ...RunOption) {
 
 		// We need to checkout dotfiles first, because they may be changing the path which affects the IDE.
 		// TODO(cw): provide better feedback if the IDE start fails because of the dotfiles (provide any feedback at all).
+		<-apiReadyCtx.Done()
+		time.Sleep(200 * time.Millisecond)
 		installDotfiles(ctx, termMuxSrv, cfg)
 	}
 
@@ -294,11 +301,8 @@ func Run(options ...RunOption) {
 		go startAndWatchIDE(ctx, cfg, cfg.DesktopIDE, &ideWG, desktopIdeReady, DesktopIDE)
 	}
 
-	var wg sync.WaitGroup
 	wg.Add(1)
 	go startContentInit(ctx, cfg, &wg, cstate)
-	wg.Add(1)
-	go startAPIEndpoint(ctx, cfg, &wg, apiServices, tunneledPortsService, apiEndpointOpts...)
 	wg.Add(1)
 	go startSSHServer(ctx, cfg, &wg)
 	wg.Add(1)
@@ -419,7 +423,7 @@ func installDotfiles(ctx context.Context, term *terminal.MuxTerminalService, cfg
 		}()
 		select {
 		case err := <-done:
-			if err != nil {
+			if err != nil && !strings.Contains(err.Error(), "wait: no child processes") {
 				return err
 			}
 		case <-time.After(120 * time.Second):
@@ -1006,8 +1010,9 @@ func isBlacklistedEnvvar(name string) bool {
 	return false
 }
 
-func startAPIEndpoint(ctx context.Context, cfg *Config, wg *sync.WaitGroup, services []RegisterableService, tunneled *ports.TunneledPortsService, opts ...grpc.ServerOption) {
+func startAPIEndpoint(ctx context.Context, cfg *Config, wg *sync.WaitGroup, readyCallback context.CancelFunc, services []RegisterableService, tunneled *ports.TunneledPortsService, opts ...grpc.ServerOption) {
 	defer wg.Done()
+	defer readyCallback()
 	defer log.Debug("startAPIEndpoint shutdown")
 
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.APIEndpointPort))
@@ -1081,6 +1086,8 @@ func startAPIEndpoint(ctx context.Context, cfg *Config, wg *sync.WaitGroup, serv
 	go http.Serve(httpMux, routes)
 
 	go m.Serve()
+
+	readyCallback()
 
 	<-ctx.Done()
 	log.Info("shutting down API endpoint")
