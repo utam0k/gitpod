@@ -128,6 +128,7 @@ export async function build(context, version) {
         exec("gcloud auth configure-docker --quiet");
         exec("gcloud auth configure-docker europe-docker.pkg.dev --quiet");
         exec("gcloud auth configure-docker --quiet");
+        exec(`gcloud auth list`);
         exec("docker pull europe-docker.pkg.dev/gitpod-artifacts/docker-dev/workspace-base-images:full");
         exec('gcloud container clusters get-credentials core-dev --zone europe-west1-b --project gitpod-core-dev');
         werft.done('prep');
