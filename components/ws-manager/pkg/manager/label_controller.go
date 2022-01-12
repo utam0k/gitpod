@@ -65,7 +65,6 @@ func (r *NodeLabelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 func (r *NodeLabelReconciler) sync(ctx context.Context, req ctrl.Request, source changeSource) (ctrl.Result, error) {
 	log := ctrl.LoggerFrom(ctx)
-	defer func() { log.Info("Pod to node mapping", "data", r.podToNodeMap) }()
 
 	var pod corev1.Pod
 	err := r.Client.Get(context.Background(), req.NamespacedName, &pod)
@@ -169,6 +168,8 @@ func (r *NodeLabelReconciler) removeLabelToNode(nodeName, namespace string) erro
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *NodeLabelReconciler) SetupWithManager(namespace string, mgr ctrl.Manager) error {
+	r.Log.Info("Configuring LabelReconciler", "namespace", namespace)
+
 	wsDaemonSelector, err := predicate.LabelSelectorPredicate(metav1.LabelSelector{
 		MatchLabels: map[string]string{"component": "ws-daemon"},
 	})
