@@ -4,7 +4,7 @@
 
 FROM europe-docker.pkg.dev/gitpod-artifacts/docker-dev/workspace-base-images:full
 
-ENV TRIGGER_REBUILD 16
+ENV TRIGGER_REBUILD 17
 
 USER root
 
