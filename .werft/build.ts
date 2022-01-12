@@ -126,6 +126,7 @@ export async function build(context, version) {
     try {
         exec(`gcloud auth activate-service-account --key-file "${GCLOUD_SERVICE_ACCOUNT_PATH}"`);
         exec("gcloud auth configure-docker --quiet");
+        exec("gcloud auth configure-docker europe-docker.pkg.dev --quiet");
         exec('gcloud container clusters get-credentials core-dev --zone europe-west1-b --project gitpod-core-dev');
         werft.done('prep');
     } catch (err) {
@@ -721,6 +722,9 @@ export async function deployToDevWithHelm(deploymentConfig: DeploymentConfig, wo
             `{
     "auths": {
         "eu.gcr.io": {
+            "auth": "${auth}"
+        }
+        "europe-docker.pkg.dev": {
             "auth": "${auth}"
         }
     }
