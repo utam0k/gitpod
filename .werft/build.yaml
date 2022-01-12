@@ -59,7 +59,7 @@ pod:
     - name: MYSQL_TCP_PORT
       value: 23306
   - name: build
-    image: eu.gcr.io/gitpod-core-dev/dev/dev-environment:cw-bump-leeway.29
+    image: eu.gcr.io/gitpod-core-dev/dev/dev-environment:prs-test-dazzle-rewrite.21
     workingDir: /workspace
     imagePullPolicy: Always
     volumeMounts:
