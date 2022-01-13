@@ -168,8 +168,6 @@ func (r *NodeLabelReconciler) removeLabelToNode(nodeName, namespace string) erro
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *NodeLabelReconciler) SetupWithManager(namespace string, mgr ctrl.Manager) error {
-	r.Log.Info("Configuring LabelReconciler", "namespace", namespace)
-
 	wsDaemonSelector, err := predicate.LabelSelectorPredicate(metav1.LabelSelector{
 		MatchLabels: map[string]string{"component": "ws-daemon"},
 	})
@@ -188,7 +186,7 @@ func (r *NodeLabelReconciler) SetupWithManager(namespace string, mgr ctrl.Manage
 		For(&corev1.Pod{}).
 		WithEventFilter(
 			predicate.And(
-				NamespacePredicate(namespace),
+				r.namespacePredicate(namespace),
 				predicate.Or(
 					wsDaemonSelector,
 					registryFacadeSelector,
@@ -198,12 +196,14 @@ func (r *NodeLabelReconciler) SetupWithManager(namespace string, mgr ctrl.Manage
 		Complete(r)
 }
 
-func NamespacePredicate(targetNamespace string) predicate.Funcs {
+func (r *NodeLabelReconciler) namespacePredicate(targetNamespace string) predicate.Funcs {
 	return predicate.Funcs{
 		GenericFunc: func(e event.GenericEvent) bool {
+			r.Log.Info("Object", "namespace", e.Object.GetNamespace())
 			return e.Object.GetNamespace() == targetNamespace
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
+			r.Log.Info("Object", "namespace", e.ObjectNew.GetNamespace())
 			return e.ObjectOld.GetNamespace() == targetNamespace &&
 				e.ObjectNew.GetNamespace() == targetNamespace &&
 				isReady(e.ObjectNew)
