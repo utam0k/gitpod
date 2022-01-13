@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -168,6 +169,10 @@ func (r *NodeLabelReconciler) removeLabelToNode(nodeName, namespace string) erro
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *NodeLabelReconciler) SetupWithManager(namespace string, mgr ctrl.Manager) error {
+	if namespace == "" {
+		namespace = metav1.NamespaceDefault
+	}
+
 	wsDaemonSelector, err := predicate.LabelSelectorPredicate(metav1.LabelSelector{
 		MatchLabels: map[string]string{"component": "ws-daemon"},
 	})
@@ -183,27 +188,24 @@ func (r *NodeLabelReconciler) SetupWithManager(namespace string, mgr ctrl.Manage
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1.Pod{}).
+		WithLogger(r.Log).
+		For(&corev1.Pod{}, builder.WithPredicates(
+			predicate.Or(wsDaemonSelector, registryFacadeSelector),
+		)).
 		WithEventFilter(
 			predicate.And(
-				r.namespacePredicate(namespace),
-				predicate.Or(
-					wsDaemonSelector,
-					registryFacadeSelector,
-				),
+				namespacePredicate(namespace),
 			),
 		).
 		Complete(r)
 }
 
-func (r *NodeLabelReconciler) namespacePredicate(targetNamespace string) predicate.Funcs {
+func namespacePredicate(targetNamespace string) predicate.Funcs {
 	return predicate.Funcs{
 		GenericFunc: func(e event.GenericEvent) bool {
-			r.Log.Info("Object", "namespace", e.Object.GetNamespace())
 			return e.Object.GetNamespace() == targetNamespace
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			r.Log.Info("Object", "namespace", e.ObjectNew.GetNamespace())
 			return e.ObjectOld.GetNamespace() == targetNamespace &&
 				e.ObjectNew.GetNamespace() == targetNamespace &&
 				isReady(e.ObjectNew)
