@@ -12,12 +12,12 @@ import 'xterm/css/xterm.css';
 import { ThemeContext } from '../theme-context';
 
 const darkTheme: ITheme = {
-  background: '#292524', // Tailwind's warmGray 800 https://tailwindcss.com/docs/customizing-colors
+  background: '#292524', // Tailwind's stone 800 https://tailwindcss.com/docs/customizing-colors
 };
 const lightTheme: ITheme = {
-  background: '#F5F5F4', // Tailwind's warmGray 100 https://tailwindcss.com/docs/customizing-colors
-  foreground: '#78716C', // Tailwind's warmGray 500 https://tailwindcss.com/docs/customizing-colors
-  cursor: '#78716C', // Tailwind's warmGray 500 https://tailwindcss.com/docs/customizing-colors
+  background: '#F5F5F4', // Tailwind's stone 100 https://tailwindcss.com/docs/customizing-colors
+  foreground: '#78716C', // Tailwind's stone 500 https://tailwindcss.com/docs/customizing-colors
+  cursor: '#78716C', // Tailwind's stone 500 https://tailwindcss.com/docs/customizing-colors
 }
 
 export interface WorkspaceLogsProps {

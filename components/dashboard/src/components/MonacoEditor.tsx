@@ -19,7 +19,7 @@ monaco.editor.defineTheme('gitpod-disabled', {
   inherit: true,
   rules: [],
   colors: {
-    'editor.background': '#F5F5F4', // Tailwind's warmGray 100 https://tailwindcss.com/docs/customizing-colors
+    'editor.background': '#F5F5F4', // Tailwind's stone 100 https://tailwindcss.com/docs/customizing-colors
   },
 });
 monaco.editor.defineTheme('gitpod-dark', {
@@ -27,7 +27,7 @@ monaco.editor.defineTheme('gitpod-dark', {
   inherit: true,
   rules: [],
   colors: {
-    'editor.background': '#292524', // Tailwind's warmGray 800 https://tailwindcss.com/docs/customizing-colors
+    'editor.background': '#292524', // Tailwind's stone 800 https://tailwindcss.com/docs/customizing-colors
   },
 });
 monaco.editor.defineTheme('gitpod-dark-disabled', {
@@ -35,7 +35,7 @@ monaco.editor.defineTheme('gitpod-dark-disabled', {
   inherit: true,
   rules: [],
   colors: {
-    'editor.background': '#44403C', // Tailwind's warmGray 700 https://tailwindcss.com/docs/customizing-colors
+    'editor.background': '#44403C', // Tailwind's stone 700 https://tailwindcss.com/docs/customizing-colors
   },
 });
 
